@@ -8,6 +8,13 @@
 struct Handler
 {
     virtual void get(const std::vector<std::string>&, const time_t t = 0) = 0;
+
+    void stream_out(const std::vector<std::string>& v, std::ostream& os)
+    {
+        os << "bulk: " << *v.cbegin();
+        for (auto it = std::next(v.cbegin()); it != std::cend(v); ++it)
+            os << ", " << *it ;       
+    }
 };
 
 struct Command {

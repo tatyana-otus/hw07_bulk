@@ -1,5 +1,5 @@
 #include "command.h"
-
+#include <fstream>
 
 struct WriteData : public Handler {
 
@@ -8,14 +8,16 @@ struct WriteData : public Handler {
         cmd->add_hanlder(this);
     }
 
-    void get(const std::vector<std::string>& data, const time_t t = 0) override
+    void get(const std::vector<std::string>& v, const time_t t = 0) override
     {
         std::string file_name = "bulk" + std::to_string(t) + ".log";
-        std::cout << file_name << " ";
-        for(auto v : data) {
-            std::cout << v << " ";
-        }
-        std::cout << "\n";
+
+        std::ofstream of{file_name};
+
+        stream_out(v, of);
+
+        of.close();
+
     }    
 };
 
@@ -28,9 +30,7 @@ struct PrintData : public Handler {
 
     void get(const std::vector<std::string>& v, const time_t t = 0) override
     {
-        os << "bulk: " << *v.cbegin();
-        for (auto it = std::next(v.cbegin()); it != std::cend(v); ++it)
-            os << ", " << *it ;
+        stream_out(v, os);
         os << "\n";
     } 
     
