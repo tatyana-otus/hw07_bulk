@@ -20,7 +20,7 @@ struct Handler
 struct Command {
     enum class Status { start, work };
 
-    Command(size_t N_):N(N_){ data.reserve(N); };
+    Command(size_t N_):N(N_), b_satic(true), cnt_braces(0) { data.reserve(N); };
 
     void add_hanlder(Handler* h)
     {
@@ -37,60 +37,49 @@ struct Command {
     }
 
     
-    enum class BulkState {end, save, idle, drop};
-    enum class CmdState {work, wait_for_sync};
+    enum class BulkState {end, save, idle};
 
     void check_state(const std::string& d)
     {
         BulkState blk_state = BulkState::idle;
 
-        switch (cmd_state) {
-            case CmdState::work:
-                if(d == "{") {
-                    if(b_satic == true){
-                        b_satic = false;
-                        blk_state = BulkState::end;
-                    } 
-                    ++cnt_braces;
-                }
-                else if (d == "}"){
-                    --cnt_braces;
-                    if(cnt_braces == 0) {
-                        b_satic = true;
-                        blk_state = BulkState::end;
-                    }
-                    else if(cnt_braces < 0){
-                        cmd_state = CmdState::wait_for_sync;
-                        blk_state = BulkState::drop;
-                    }    
-                }
-                else if (d == "") {
-                    if((cnt_braces != 0) && (b_satic == false))
-                        blk_state = BulkState::drop;
-                    else
-                        blk_state = BulkState::end; 
-                    cnt_braces = 0;
-                    b_satic = true;
-                }
-                else {
-                    if(data.empty())
-                        time = std::time(nullptr);
-                    blk_state = BulkState::save;
-                }
-                break;
-            case CmdState::wait_for_sync:
-                if (d == "") {
-                    cnt_braces = 0;
-                    b_satic = true;
-                    cmd_state = CmdState::work;
-                } 
-                break;   
+        if(d == "{") {
+            if(b_satic == true){
+                b_satic = false;
+                blk_state = BulkState::end;
+            } 
+            ++cnt_braces;
         }
-        exec_state(blk_state, d);
+        else if (d == "}"){
+            --cnt_braces;
+            if(cnt_braces == 0) {
+                b_satic = true;
+                blk_state = BulkState::end;
+            }
+            else if(cnt_braces < 0){
+                throw std::invalid_argument("wrong command stream");
+            }    
+        }
+        else {
+            if(data.empty())
+                time = std::time(nullptr);
+            data.push_back(d);
+            blk_state = BulkState::save;
+        }
+
+        exec_state(blk_state);
     }
 
 
-    void exec_state(BulkState state, const std::string& d) {
+    void finish()
+    {
+        if(b_satic == true) {
+            exec_state(BulkState::end);
+        }
+    }
+
+
+    void exec_state(BulkState state) {
 
         switch(state) {
 
@@ -99,16 +88,11 @@ struct Command {
                 data.clear();
                 break;
 
-            case BulkState::save:                
-                data.push_back(d);
+            case BulkState::save:                                
                 if((b_satic == true) && (data.size() == N)){
-                    exec_state(BulkState::end, d);
+                    exec_state(BulkState::end);
                 }
                 break;  
-
-            case BulkState::drop:
-                data.clear();
-                break; 
 
             case BulkState::idle:
                 break;    
@@ -119,9 +103,8 @@ private:
     std::time_t time;
     std::vector<std::string> data;
     std::vector<Handler*> data_handler;
-    bool b_satic = true;
-    CmdState cmd_state = CmdState::work;
-
-    int cnt_braces = 0;
     size_t N;
+    bool b_satic;
+    int cnt_braces;
+    
 };

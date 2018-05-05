@@ -11,6 +11,7 @@ void get_data(unsigned long long N, std::istream& is, std::ostream& os)
     for(std::string line; std::getline(is, line);){ 
         cmd.check_state(line);
     }
+    cmd.finish();
 }
 
 void prosess(const char* cin_str, std::istream& is = std::cin, std::ostream& os = std::cout)
