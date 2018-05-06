@@ -9,7 +9,6 @@
 BOOST_AUTO_TEST_SUITE(test_suite_log)
 
 
-
 BOOST_AUTO_TEST_CASE(log)
 {  
     std::stringstream ess;

@@ -15,8 +15,6 @@ BOOST_AUTO_TEST_CASE(test_version_valid)
 }
 
 
-
-
 BOOST_AUTO_TEST_CASE(base_invalid_input)
 {
     BOOST_CHECK_THROW(prosess("-1"),  std::invalid_argument);
@@ -33,9 +31,50 @@ BOOST_AUTO_TEST_CASE(base_invalid_input)
 
     auto str_3 = std::to_string(v.max_size() );
     BOOST_CHECK_THROW(test_prosess(str_3.c_str(), "", ""), std::bad_alloc);
-
 }
 
 
+BOOST_AUTO_TEST_CASE(command_class)
+{
+    int count     = 0;
+    int blk_size  = 0;
+    const int N   = 4;
+    
+    struct Bulk_Count : public Handler
+    {
+        Bulk_Count(int& cnt_, int& size_):cnt(cnt_), size(size_) {}
+       
+        void on_bulk_resolved(const std::vector<std::string>& v, const time_t t = 0) override
+        {
+            ++cnt;
+            size = v.size();
+        } 
+        int &cnt;
+        int &size;
+    };
+
+     Command cmd {N};
+     cmd.add_hanlder(std::make_unique<Bulk_Count>(count, blk_size));
+
+     cmd.on_new_cmd("1");
+     BOOST_CHECK_EQUAL( cmd.size(), 1 );
+     BOOST_CHECK_EQUAL( count,      0 );
+     BOOST_CHECK_EQUAL( blk_size,   0 );
+
+     cmd.on_new_cmd("2");
+     BOOST_CHECK_EQUAL( cmd.size(), 2 );
+     BOOST_CHECK_EQUAL( count,      0 );
+     BOOST_CHECK_EQUAL( blk_size,   0 );
+
+     cmd.on_new_cmd("3");
+     BOOST_CHECK_EQUAL( cmd.size(), 3 );
+     BOOST_CHECK_EQUAL( count,      0 );
+     BOOST_CHECK_EQUAL( blk_size,   0 );
+
+     cmd.on_new_cmd("4");
+     BOOST_CHECK_EQUAL( cmd.size(), 0 );
+     BOOST_CHECK_EQUAL( count,      1 );
+     BOOST_CHECK_EQUAL( blk_size,   N );
+}
 
 BOOST_AUTO_TEST_SUITE_END()

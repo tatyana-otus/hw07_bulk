@@ -7,7 +7,7 @@
 
 struct Handler
 {
-    virtual void get(const std::vector<std::string>&, const time_t t = 0) = 0;
+    virtual void on_bulk_resolved(const std::vector<std::string>&, const time_t t = 0) = 0;
 
     void stream_out(const std::vector<std::string>& v, std::ostream& os)
     {
@@ -19,7 +19,6 @@ struct Handler
 
 
 struct Command {
-    enum class Status { start, work };
 
     Command(size_t N_):N(N_), b_satic(true), cnt_braces(0)
     {
@@ -31,21 +30,21 @@ struct Command {
         data_handler.push_back(std::move(h));
     }
 
-    void handel_bulk()
+    void on_bulk_created()
     {
         if(!data.empty()) {
             for (auto const& h : data_handler) {
-                h->get(data, time);
+                h->on_bulk_resolved(data, time);
             } 
         }       
     }
 
     
-    enum class BulkState {end, save, idle};
+    enum class BulkState { end, save };
 
-    void check_state(const std::string& d)
+    void on_new_cmd(const std::string& d)
     {
-        BulkState blk_state = BulkState::idle;
+        BulkState blk_state = BulkState::save;
 
         if(d == "{") {
             if(b_satic == true){
@@ -68,14 +67,13 @@ struct Command {
             if(data.empty())
                 time = std::time(nullptr);
             data.push_back(d);
-            blk_state = BulkState::save;
         }
 
         exec_state(blk_state);
     }
 
 
-    void finish()
+    void on_cmd_end()
     {
         if(b_satic == true) {
             exec_state(BulkState::end);
@@ -88,7 +86,7 @@ struct Command {
         switch(state) {
 
             case BulkState::end:
-                handel_bulk();
+                on_bulk_created();
                 data.clear();
                 break;
 
@@ -96,11 +94,13 @@ struct Command {
                 if((b_satic == true) && (data.size() == N)){
                     exec_state(BulkState::end);
                 }
-                break;  
-
-            case BulkState::idle:
-                break;    
+                break;     
         }
+    }
+
+    auto size()
+    {
+        return data.size();
     }
 
 private:
@@ -109,6 +109,5 @@ private:
     std::vector<std::unique_ptr<Handler>> data_handler;
     size_t N;
     bool b_satic;
-    int cnt_braces;
-    
+    int cnt_braces;   
 };

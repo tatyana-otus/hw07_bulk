@@ -7,7 +7,7 @@ struct WriteData : public Handler
     WriteData(std::ostream& es_ = std::cout):es(es_) {}
    
 
-    void get(const std::vector<std::string>& v, const time_t t = 0) override
+    void on_bulk_resolved(const std::vector<std::string>& v, const time_t t = 0) override
     {
         std::string file_name = "bulk" + std::to_string(t) + ".log";
 
@@ -46,7 +46,7 @@ struct PrintData : public Handler
     PrintData(std::ostream& os_ = std::cout):os(os_) {}
    
 
-    void get(const std::vector<std::string>& v, const time_t t = 0) override
+    void on_bulk_resolved(const std::vector<std::string>& v, const time_t t = 0) override
     {
         stream_out(v, os);
         os << std::endl;

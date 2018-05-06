@@ -15,7 +15,6 @@ void test_prosess(const char* N, const std::string& in_data, const std::string& 
     prosess(N, iss, oss);
 
     BOOST_CHECK_EQUAL( oss.str(), out_data );
-
 }
 
 void one_cmd_pass(std::stringstream& err_stream)
