@@ -3,11 +3,19 @@ project(test)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 add_executable(test_main_cli test_main.cpp)
+add_executable(test_log_cli  test_log.cpp)
+add_executable(test_bulk_cli test_bulk.cpp)
 
-target_include_directories(test_main_cli PRIVATE ../include)
-target_include_directories(test_main_cli PRIVATE ${Boost_INCLUDE_DIR})
+target_include_directories(test_main_cli  PRIVATE ../include)
+target_include_directories(test_main_cli  PRIVATE ${Boost_INCLUDE_DIR})
 
-set_target_properties(test_main_cli PROPERTIES
+target_include_directories(test_log_cli PRIVATE ../include)
+target_include_directories(test_log_cli PRIVATE ${Boost_INCLUDE_DIR})
+
+target_include_directories(test_bulk_cli PRIVATE ../include)
+target_include_directories(test_bulk_cli PRIVATE ${Boost_INCLUDE_DIR})
+
+set_target_properties(test_main_cli test_log_cli test_bulk_cli PROPERTIES
   CXX_STANDARD 14
   CXX_STANDARD_REQUIRED ON
   COMPILE_OPTIONS -Wpedantic -Wall -Wextra
@@ -19,14 +27,16 @@ target_link_libraries(test_main_cli
   version
 )
 
+target_link_libraries(test_log_cli
+  ${Boost_LIBRARIES}
+)
+
+target_link_libraries(test_bulk_cli
+  ${Boost_LIBRARIES}
+)
+
 enable_testing()
 
-add_test(test_version_valid           test_main_cli -t test_suite_main/test_version_valid)
-add_test(test_base_invalid_input      test_main_cli -t test_suite_bulk/base_invalid_input)
-add_test(test_empty_bulk              test_main_cli -t test_suite_bulk/empty_bulk)
-add_test(test_static_bulk             test_main_cli -t test_suite_bulk/static_bulk)
-add_test(test_dinamic_bulk            test_main_cli -t test_suite_bulk/dinamic_bulk)
-add_test(test_dinamic_enclosed_bulk   test_main_cli -t test_suite_bulk/dinamic_enclosed_bulk)
-add_test(test_incomplete_dinamic_bulk test_main_cli -t test_suite_bulk/incomplete_dinamic_bulk)
-add_test(test_cmd_stream              test_main_cli -t test_suite_bulk/cmd_stream)
-add_test(test_wrong_cmd_stream        test_main_cli -t test_suite_bulk/wrong_cmd_stream)
+add_test(test_main        test_main_cli -t test_suite_main)
+add_test(test_bulk        test_bulk_cli -t test_suite_bulk)
+add_test(test_log         test_log_cli -t  test_suite_log)

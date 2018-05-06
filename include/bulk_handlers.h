@@ -1,37 +1,55 @@
 #include "command.h"
 #include <fstream>
 
-struct WriteData : public Handler {
 
-    WriteData(Command *cmd)
-    {
-        cmd->add_hanlder(this);
-    }
+struct WriteData : public Handler
+{
+    WriteData(std::ostream& es_ = std::cout):es(es_) {}
+   
 
     void get(const std::vector<std::string>& v, const time_t t = 0) override
     {
         std::string file_name = "bulk" + std::to_string(t) + ".log";
 
-        std::ofstream of{file_name};
+        if(!is_file_exist(file_name)){
 
-        stream_out(v, of);
+            std::ofstream of{file_name};        
 
-        of.close();
+            stream_out(v, of);
 
-    }    
+            of.close();
+        }
+        else {
+            es << "log file already exists" << std::endl;
+        }    
+    } 
+
+    private:
+
+    std::ostream& es;    
+    
+    bool is_file_exist(std::string file_name) 
+    {
+        std::ifstream file;
+        file.open(file_name, std::fstream::in);
+        if(file) {
+            file.close();
+            return true;
+        }
+        return false;
+    }     
 };
 
-struct PrintData : public Handler {
 
-    PrintData(Command *cmd, std::ostream& os_ = std::cout):os(os_)
-    {
-        cmd->add_hanlder(this);
-    }
+struct PrintData : public Handler
+{
+    PrintData(std::ostream& os_ = std::cout):os(os_) {}
+   
 
     void get(const std::vector<std::string>& v, const time_t t = 0) override
     {
         stream_out(v, os);
-        os << "\n";
+        os << std::endl;
     } 
     
 private:

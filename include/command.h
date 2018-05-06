@@ -3,7 +3,7 @@
 #include "debug_log.h"
 #include <ctime>
 #include <vector>
-
+#include <memory>
 
 struct Handler
 {
@@ -17,20 +17,24 @@ struct Handler
     }
 };
 
+
 struct Command {
     enum class Status { start, work };
 
-    Command(size_t N_):N(N_), b_satic(true), cnt_braces(0) { data.reserve(N); };
-
-    void add_hanlder(Handler* h)
+    Command(size_t N_):N(N_), b_satic(true), cnt_braces(0)
     {
-        data_handler.push_back(h);
+        data.reserve(N);
+    };
+
+    void add_hanlder(std::unique_ptr<Handler>&& h)
+    {
+        data_handler.push_back(std::move(h));
     }
 
     void handel_bulk()
     {
         if(!data.empty()) {
-            for (auto h : data_handler) {
+            for (auto const& h : data_handler) {
                 h->get(data, time);
             } 
         }       
@@ -102,7 +106,7 @@ struct Command {
 private:
     std::time_t time;
     std::vector<std::string> data;
-    std::vector<Handler*> data_handler;
+    std::vector<std::unique_ptr<Handler>> data_handler;
     size_t N;
     bool b_satic;
     int cnt_braces;
