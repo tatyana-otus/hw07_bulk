@@ -25,9 +25,9 @@ struct Command {
     }
 
 
-    void add_hanlder(std::unique_ptr<Handler>&& h)
+    void add_hanlder(std::shared_ptr<Handler> h)
     {
-        data_handler.push_back(std::move(h));
+        data_handler.push_back(h);
     }
 
 
@@ -108,7 +108,7 @@ struct Command {
 private:
     std::time_t time;
     std::vector<std::string> data;
-    std::vector<std::unique_ptr<Handler>> data_handler;
+    std::vector<std::shared_ptr<Handler>> data_handler;
     size_t N;
     bool b_satic;
     int cnt_braces;   

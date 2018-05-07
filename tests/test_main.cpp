@@ -36,45 +36,46 @@ BOOST_AUTO_TEST_CASE(N_input)
 
 BOOST_AUTO_TEST_CASE(command_class)
 {
-    int count     = 0;
-    int blk_size  = 0;
     const int N   = 4;
     
     struct Bulk_Count : public Handler
     {
-        Bulk_Count(int& cnt_, int& size_):cnt(cnt_), size(size_) {}
+        Bulk_Count():cnt(0), size(0) {}
        
         void on_bulk_resolved(const std::vector<std::string>& v, const time_t t = 0) override
         {
             ++cnt;
             size = v.size();
         } 
-        int &cnt;
-        int &size;
+
+        int cnt;
+        int size;
     };
 
-     Command cmd {N};
-     cmd.add_hanlder(std::make_unique<Bulk_Count>(count, blk_size));
+    auto h = std::make_shared<Bulk_Count>();
+    Command cmd {N};
+    
+    cmd.add_hanlder(h);
 
-     cmd.on_new_cmd("1");
-     BOOST_CHECK_EQUAL( cmd.size(), 1 );
-     BOOST_CHECK_EQUAL( count,      0 );
-     BOOST_CHECK_EQUAL( blk_size,   0 );
+    cmd.on_new_cmd("1");
+    BOOST_CHECK_EQUAL( cmd.size(), 1 );
+    BOOST_CHECK_EQUAL( h->cnt,     0 );
+    BOOST_CHECK_EQUAL( h->size,    0 );
 
-     cmd.on_new_cmd("2");
-     BOOST_CHECK_EQUAL( cmd.size(), 2 );
-     BOOST_CHECK_EQUAL( count,      0 );
-     BOOST_CHECK_EQUAL( blk_size,   0 );
+    cmd.on_new_cmd("2");
+    BOOST_CHECK_EQUAL( cmd.size(), 2 );
+    BOOST_CHECK_EQUAL( h->cnt,     0 );
+    BOOST_CHECK_EQUAL( h->size,    0 );
 
-     cmd.on_new_cmd("3");
-     BOOST_CHECK_EQUAL( cmd.size(), 3 );
-     BOOST_CHECK_EQUAL( count,      0 );
-     BOOST_CHECK_EQUAL( blk_size,   0 );
+    cmd.on_new_cmd("3");
+    BOOST_CHECK_EQUAL( cmd.size(), 3 );
+    BOOST_CHECK_EQUAL( h->cnt,     0 );
+    BOOST_CHECK_EQUAL( h->size,    0 );
 
-     cmd.on_new_cmd("4");
-     BOOST_CHECK_EQUAL( cmd.size(), 0 );
-     BOOST_CHECK_EQUAL( count,      1 );
-     BOOST_CHECK_EQUAL( blk_size,   N );
+    cmd.on_new_cmd("4");
+    BOOST_CHECK_EQUAL( cmd.size(), 0 );
+    BOOST_CHECK_EQUAL( h->cnt,     1 );
+    BOOST_CHECK_EQUAL( h->size,    N );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

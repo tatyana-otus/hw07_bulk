@@ -5,8 +5,8 @@ void get_data(unsigned long long N, std::istream& is, std::ostream& os, std::ost
 {
     Command cmd {N};
 
-    cmd.add_hanlder(std::make_unique<WriteData>(es));
-    cmd.add_hanlder(std::make_unique<PrintData>(os));
+    cmd.add_hanlder(std::make_shared<WriteData>(es));
+    cmd.add_hanlder(std::make_shared<PrintData>(os));
 
     for(std::string line; std::getline(is, line);){ 
         cmd.on_new_cmd(line);
