@@ -1,6 +1,5 @@
 #include <iostream>
 #include <algorithm>
-#include "debug_log.h"
 #include <ctime>
 #include <vector>
 #include <memory>
@@ -23,12 +22,14 @@ struct Command {
     Command(size_t N_):N(N_), b_satic(true), cnt_braces(0)
     {
         data.reserve(N);
-    };
+    }
+
 
     void add_hanlder(std::unique_ptr<Handler>&& h)
     {
         data_handler.push_back(std::move(h));
     }
+
 
     void on_bulk_created()
     {
@@ -47,11 +48,11 @@ struct Command {
         BulkState blk_state = BulkState::save;
 
         if(d == "{") {
+            ++cnt_braces;
             if(b_satic == true){
                 b_satic = false;
                 blk_state = BulkState::end;
-            } 
-            ++cnt_braces;
+            }            
         }
         else if (d == "}"){
             --cnt_braces;
@@ -90,13 +91,14 @@ struct Command {
                 data.clear();
                 break;
 
-            case BulkState::save:                                
+            case BulkState::save:
                 if((b_satic == true) && (data.size() == N)){
                     exec_state(BulkState::end);
                 }
-                break;     
+                break;
         }
     }
+
 
     auto size()
     {

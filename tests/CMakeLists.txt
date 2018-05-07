@@ -39,4 +39,4 @@ enable_testing()
 
 add_test(test_main        test_main_cli -t test_suite_main)
 add_test(test_bulk        test_bulk_cli -t test_suite_bulk)
-add_test(test_log         test_log_cli -t  test_suite_log)
+add_test(test_log         test_log_cli  -t test_suite_log)

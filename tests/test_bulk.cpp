@@ -138,10 +138,20 @@ BOOST_AUTO_TEST_CASE(wrong_cmd_stream)
 }
 
 
-BOOST_AUTO_TEST_CASE(cmd_break){  
-
+BOOST_AUTO_TEST_CASE(cmd_break)
+{  
     test_prosess("2", "cmd1\n", "bulk: cmd1\n");
     test_prosess("2", "cmd",    "bulk: cmd\n");
+}
+
+
+BOOST_AUTO_TEST_CASE(big_cmd)
+{
+    std::string  in_data (1024 * 1024, 'a');
+
+    std::string out_data =  "bulk: " + in_data + "\n" ;    
+
+    test_prosess("1", in_data, out_data);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

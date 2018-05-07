@@ -1,4 +1,3 @@
-//#define DEBUG_INFO_ALL
 #include "functions.h"
 
 int main(int argc, char* argv[])

@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(test_version_valid)
 }
 
 
-BOOST_AUTO_TEST_CASE(base_invalid_input)
+BOOST_AUTO_TEST_CASE(N_input)
 {
     BOOST_CHECK_THROW(prosess("-1"),  std::invalid_argument);
     BOOST_CHECK_THROW(prosess("0"),   std::invalid_argument);

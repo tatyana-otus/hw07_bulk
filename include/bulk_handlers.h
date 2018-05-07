@@ -13,14 +13,14 @@ struct WriteData : public Handler
 
         if(!is_file_exist(file_name)){
 
-            std::ofstream of{file_name};        
+            std::ofstream of{file_name};
 
             stream_out(v, of);
 
             of.close();
         }
         else {
-            es << "log file already exists" << std::endl;
+            es << file_name << " log file already exists" << std::endl;
         }    
     } 
 
@@ -30,8 +30,8 @@ struct WriteData : public Handler
     
     bool is_file_exist(std::string file_name) 
     {
-        std::ifstream file;
-        file.open(file_name, std::fstream::in);
+        std::ifstream file{file_name};
+
         if(file) {
             file.close();
             return true;
