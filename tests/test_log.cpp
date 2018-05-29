@@ -1,6 +1,3 @@
-#include <chrono>
-#include <thread>
-
 #define BOOST_TEST_MODULE test_main
 
 #include "test_helper.h"
@@ -22,12 +19,6 @@ BOOST_AUTO_TEST_CASE(log_file_creation)
 
     one_cmd1_pass(ess);
     BOOST_CHECK_EQUAL( ess.str(), "" );
-}
-
-
-BOOST_AUTO_TEST_CASE(log_file_content)
-{  
-    std::stringstream ess;
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 

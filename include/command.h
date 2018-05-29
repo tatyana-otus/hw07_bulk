@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 
+const size_t MAX_BULK_SIZE  = 128;
+
 struct Handler
 {
     virtual void on_bulk_resolved(const std::vector<std::string>&, const time_t t = 0) = 0;
@@ -19,7 +21,7 @@ struct Handler
 
 struct Command {
 
-    Command(size_t N_):N(N_), b_satic(true), cnt_braces(0)
+    Command(size_t N_):N(N_), braces_count(0)
     {
         data.reserve(N);
     }
@@ -47,20 +49,18 @@ struct Command {
     {
         BulkState blk_state = BulkState::save;
 
-        if(d == "{") {
-            ++cnt_braces;
-            if(b_satic == true){
-                b_satic = false;
-                blk_state = BulkState::end;
-            }            
-        }
-        else if (d == "}"){
-            --cnt_braces;
-            if(cnt_braces == 0) {
-                b_satic = true;
+        if(d == "{") {  
+            if(braces_count == 0) {
                 blk_state = BulkState::end;
             }
-            else if(cnt_braces < 0){
+            ++braces_count;        
+        }
+        else if (d == "}"){
+            --braces_count;
+            if(braces_count == 0) {
+                blk_state = BulkState::end;
+            }
+            else if(braces_count < 0){
                 throw std::invalid_argument("wrong command stream");
             }    
         }
@@ -76,7 +76,7 @@ struct Command {
 
     void on_cmd_end()
     {
-        if(b_satic == true) {
+        if(braces_count == 0){
             exec_state(BulkState::end);
         }
     }
@@ -92,13 +92,12 @@ struct Command {
                 break;
 
             case BulkState::save:
-                if((b_satic == true) && (data.size() == N)){
+                if((braces_count == 0) && (data.size() == N)){
                     exec_state(BulkState::end);
                 }
                 break;
         }
     }
-
 
     auto size()
     {
@@ -110,6 +109,5 @@ private:
     std::vector<std::string> data;
     std::vector<std::shared_ptr<Handler>> data_handler;
     size_t N;
-    bool b_satic;
-    int cnt_braces;   
+    int braces_count;   
 };

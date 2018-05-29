@@ -22,15 +22,12 @@ BOOST_AUTO_TEST_CASE(N_input)
     BOOST_CHECK_THROW(prosess("0x10"),std::invalid_argument);
     BOOST_CHECK_THROW(prosess("a34"), std::invalid_argument);
 
-    auto str_1 = std::to_string(std::numeric_limits<unsigned long long>::max() + 1);
+    auto str_1 = std::to_string(MAX_BULK_SIZE + 1);
     BOOST_CHECK_THROW(test_prosess(str_1.c_str(), "", ""), std::invalid_argument);
 
-    std::vector<std::string> v;
-    auto str_2 = std::to_string(v.max_size() + 1 );
-    BOOST_CHECK_THROW(test_prosess(str_2.c_str(), "", ""), std::length_error);
+    auto str_2 = std::to_string(MAX_BULK_SIZE);
+    BOOST_CHECK_NO_THROW(test_prosess(str_2.c_str(), "", ""));
 
-    auto str_3 = std::to_string(v.max_size() );
-    BOOST_CHECK_THROW(test_prosess(str_3.c_str(), "", ""), std::bad_alloc);
 }
 
 
